@@ -40,7 +40,7 @@ print('input_layer:',input_layer.shape, 'attention_matrix:',attention_matrix.sha
 # print('attention_layer:',attention_layer.shape)
 
 # LSTM
-lstm_layer = LSTM(128, return_sequences=True,kernel_regularizer=regularizers.l2(0.0004))(input_layer)
+lstm_layer = LSTM(128, return_sequences=True,kernel_regularizer=regularizers.l2(0.025))(input_layer)
 print('lstm_layer:',lstm_layer.shape)
 
 # attention层
@@ -63,11 +63,11 @@ output_layer = Dense(1, activation='sigmoid')(flatten_layer)
 
 # model
 model = Model(inputs=[input_layer, attention_matrix], outputs=output_layer)
-optimizer = keras.optimizers.Adam(learning_rate=0.0001)
-model.compile(optimizer='Adam', loss='binary_crossentropy', metrics=['accuracy'],loss_weights=[1, 0.0])
+optimizer = keras.optimizers.Adam(learning_rate=0.00001)
+model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'],loss_weights=[0.9, 0.0])
 
 # train
-model.fit([X_train, counter_matrix_train], y_train, epochs=10000, batch_size=1000, validation_data=([X_test, counter_matrix_test], y_test))
+model.fit([X_train, counter_matrix_train], y_train, epochs=10000, batch_size=2000, validation_data=([X_test, counter_matrix_test], y_test))
 
 # evaluate
 model.evaluate([X_train, counter_matrix_train], y_train)
