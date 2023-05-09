@@ -40,7 +40,7 @@ def attention_3d_block(inputs):
     # inputs.shape = (batch_size, time_steps, input_dim)
     TIME_STEPS = int(inputs.shape[1])
     a = Permute((2, 1))(inputs)
-    a = Dense(TIME_STEPS, activation='sigmoid')(a)
+    a = Dense(TIME_STEPS, activation='softmax')(a)
     a_probs = Permute((2, 1))(a)
     output_attention_mul = Multiply()([inputs, a_probs])
     return output_attention_mul
@@ -66,8 +66,9 @@ print(concat_layer.shape)
 # print(concat_layer.shape)
 
 dense_layer = Dense(128, activation='relu')(concat_layer)
-dropout_layer = Dropout(0.2)(dense_layer)
-flatten_layer = keras.layers.Flatten()(dropout_layer)
+dropout_layer = Dropout(0.1)(dense_layer)
+dense_layer1 = Dense(32, activation='relu')(dropout_layer)
+flatten_layer = keras.layers.Flatten()(dense_layer1)
 output_layer = Dense(1,activation='sigmoid')(flatten_layer)
 
 #
@@ -77,7 +78,7 @@ model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accurac
 
 # train
 callbacks = [keras.callbacks.EarlyStopping(monitor='val_loss', patience=20,mode='auto'), \
-                 keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=5, mode='auto',cooldown=2, min_lr=0)]
+                 keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.8, patience=5, mode='auto',cooldown=2, min_lr=0)]
 model.fit([X0_train,X1_train,counter0_train,counter1_train], y_train, epochs=500, batch_size=2000,\
           validation_data=([X0_test,X1_test,counter0_test,counter1_test], y_test),callbacks=callbacks)
 # evaluate
@@ -85,3 +86,5 @@ model.fit([X0_train,X1_train,counter0_train,counter1_train], y_train, epochs=500
 print(model.predict([X0_train,X1_train,counter0_train,counter1_train]),y_train)
 
 model.evaluate([X0_test,X1_test,counter0_test,counter1_test], y_test)
+
+model.save('bi_lstm.h5')
